@@ -23,7 +23,7 @@
 # -----------------------------------------------------------------------
 x-superset-user: &superset-user root
 x-superset-depends-on: &superset-depends-on
-  - db
+  - db_mysql
   - redis
 x-superset-volumes: &superset-volumes
   # /app/pythonpath_docker will be appended to the PYTHONPATH in the final container
@@ -59,20 +59,34 @@ services:
     volumes:
       - redis:/data
 
-  db:
+  db_pg:
     env_file:
       - path: docker/.env # default
         required: true
       - path: docker/.env-local # optional override
         required: false
     image: postgres:15
-    container_name: superset_db
+    container_name: superset_db_pg
     restart: unless-stopped
     ports:
-      - "127.0.0.1:5432:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
-      - db_home:/var/lib/postgresql/data
+      - db_pg_home:/var/lib/postgresql/data
       - ./docker/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+
+  db_mysql:
+    env_file:
+      - path: docker/.env # default
+        required: true
+      - path: docker/.env-local # optional override
+        required: false
+    image: mysql:5.7.42
+    container_name: superset_db_mysql
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - db_mysql_home:/var/lib/mysql
 
   superset:
     env_file:
@@ -232,7 +246,9 @@ services:
 volumes:
   superset_home:
     external: false
-  db_home:
+  db_pg_home:
+    external: false
+  db_mysql_home:
     external: false
   redis:
     external: false
