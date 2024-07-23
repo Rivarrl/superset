@@ -28,7 +28,7 @@ def authenticate(email, psw):
     auth_url = f'{server_url}/rbac/auth/login'
     post_data = {
         "platId": "303191694492971008",
-        "userAccount": email,
+        "userAccount": email.split('@')[0],
         "userPassword": encrypt_psw
     }
     headers = {}
