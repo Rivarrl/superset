@@ -17,7 +17,7 @@ class MySecurityManager(SupersetSecurityManager):
     logger.info("using customize my security manager")
     authremoteuserview = MyAuthRemoteUserView
 
-    def auth_user_remote_user(self, username):
+    def auth_user_remote_user(self, email):
         """
             this is a overwrite method
             
@@ -25,24 +25,21 @@ class MySecurityManager(SupersetSecurityManager):
 
             :type self: User model
         """
-        user = self.find_user(username=username)
-
+        user = self.find_user(email=email)
         # User does not exist, create one if auto user registration.
         if user is None and self.auth_user_registration:
             user = self.add_user(
-    # All we have is REMOTE_USER, so we set
-    # the other fields to blank.
-                username=username,
-                first_name=username.split('@')[0],
-                last_name='-',
-                email=username,
+                # All we have is REMOTE_USER, so we set
+                # the other fields to blank.
+                username=email.split('@')[0],
+                first_name=email.split('@')[0],
+                last_name='',
+                email=email,
                 role=self.find_role(self.auth_user_registration_role))
-
         # If user does not exist on the DB and not auto user registration,
         # or user is inactive, go away.
-        elif user is None or (not user.is_active()):
-            logger.info(LOGMSG_WAR_SEC_LOGIN_FAILED.format(username))
+        elif user is None or not user.is_active:
+            logger.info(LOGMSG_WAR_SEC_LOGIN_FAILED.format(email))
             return None
-            
         self.update_user_auth_stat(user)
         return user

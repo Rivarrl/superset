@@ -50,19 +50,19 @@ class MyAuthRemoteUserView(AuthRemoteUserView):
 
         if form.validate_on_submit():
             logger.info("going to auth MY user: %s" % form.email.data)
-            my_user = remote_server_api.authenticate(form.email.data,
-                                            form.password.data)
-            # if my_user is authenticated                          
-            if my_user:
-                user = self.appbuilder.sm.auth_user_remote_user(
-                    my_user.get('username'))
-                if user is None:
-                    flash(as_unicode(self.invalid_login_message), 'warning')
-                else:
-                    login_user(user)
-                    return redirect(self.appbuilder.get_url_for_index)
+            user = None
+            if form.email.data == "admin@faw.com.cn":
+                user = self.appbuilder.sm.auth_user_db(form.email.data, form.password.data)
             else:
+                my_user = remote_server_api.authenticate(form.email.data, form.password.data)
+                # if my_user is authenticated
+                if my_user:
+                    user = self.appbuilder.sm.auth_user_remote_user(my_user.get('email'))
+            if user is None:
                 flash(as_unicode(self.invalid_login_message), 'warning')
+            else:
+                login_user(user)
+                return redirect(self.appbuilder.get_url_for_index)
         else:
             if form.errors.get('email') is not None:
                 flash(
