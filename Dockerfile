@@ -18,19 +18,21 @@
 ######################################################################
 # Node stage to deal with static asset construction
 ######################################################################
-ARG PY_VER=3.10-slim-bookworm
+ARG PY_VER=3-alpine-arm64v8
+ARG NODE_VER=18-alpine-arm64v8
 
 # if BUILDPLATFORM is null, set it to 'amd64' (or leave as is otherwise).
 ARG BUILDPLATFORM=${BUILDPLATFORM:-amd64}
-FROM --platform=${BUILDPLATFORM} node:18-bullseye-slim AS superset-node
+FROM --platform=${BUILDPLATFORM} registry.faw.cn/security/node:${NODE_VER} AS superset-node
 
 ARG NPM_BUILD_CMD="build"
 
 # Somehow we need python3 + build-essential on this side of the house to install node-gyp
-RUN apt-get update -qq \
-    && apt-get install \
-        -yqq --no-install-recommends \
-        build-essential \
+RUN apk update -q \
+    && apk add \
+        --no-progress \
+        --update \
+        build-base \
         python3
 
 ENV BUILD_CMD=${NPM_BUILD_CMD} \
@@ -60,7 +62,7 @@ RUN rm /app/superset/translations/messages.pot
 ######################################################################
 # Final lean image...
 ######################################################################
-FROM python:${PY_VER} AS lean
+FROM registry.faw.cn/security/python:${PY_VER} AS lean
 
 WORKDIR /app
 ENV LANG=C.UTF-8 \
