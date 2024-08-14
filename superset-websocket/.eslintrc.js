@@ -36,5 +36,6 @@ module.exports = {
     "lodash/import-scope": [2, "member"],
     "@typescript-eslint/explicit-module-boundary-types": 0,
     "@typescript-eslint/no-var-requires": 0,
+    "prettier/prettier": ["error", { "endOfLine": "auto" }],
   },
 };
